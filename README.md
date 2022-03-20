@@ -11,3 +11,10 @@ The resultant file can then identify profit/loss in your Shopify shipping charge
 There are two dummy CSV files in the data directories that will need to be replaced with live data.
 One file will be the CSV export of Shopify orders to be placed in the orders data folder.
 One file will be the CSV export of the Royal Mail Click & Drop manifest charges to be placed in the manifest data folder 
+
+This script calls the tidyvers so you will have to install it if it is not already in your Rstduio install
+
+``` r
+# To install the latest version from Github:
+install.packages("tidyverse")
+```
