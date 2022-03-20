@@ -38,6 +38,7 @@ This script will write to a CSV file called manifest_dump.csv in the data direct
 There is a dummy file showing the field names in the header row.
 
 ```{r}
+# To write output to a CSV file:
 write_csv(manifest_dump,"data/output/manifest_dump.csv")
 ```
 
