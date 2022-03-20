@@ -1,1 +1,101 @@
+---
+title: "grid_manifest"
+output: html_document
+date: '2022-03-18'
+---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+orders <- read_csv("data/combined/combined.csv")
+manifest <- read_csv("data/manifest/combined.csv")
+```
+
+```{r}
+mani_orders <- orders %>%
+  mutate(str_name = as.double(substring(Name,2))) %>%
+  select(str_name,Total,Shipping)
+```
+```{r}
+manifest_details <- manifest %>% 
+  select(`Order number`,`Weight (kg)`,`Package size`,`Shipping service`,`Despatch date`)
+```
+
+```{r}
+
+# Royal Mail prices inc VAT
+# weights listed in (g)
+large_letter = list("100g"=c("1.37","1.08"),"250g"=c("1.94","1.48"),"500g"=c("2.11","1.70"),"750g"=c("2.75","2.22"))
+parcel = list("1000g"=c("4.06","3.07"),"2000g"=c("4.30","3.43"),"10000g"=c("7.14"),"20000g"=c("13.14"))
+sdg_wd = list("100g"=c("7.50"),"500g"=c("7.86"),"1000g"=c("9.18"),"2000g"=c("11.70"),"10000g"=c("16.14"))
+sdg_we = list("100g"=c("10.50"),"500g"=c("10.86"),"1000g"=c("12.18"),"2000g"=c("14.70"),"10000g"=c("19.14"))
+
+#weights listed in (kg)
+manifest_dump <- right_join(mani_orders,manifest_details,by = c("str_name" = "Order number")) %>% 
+  
+mutate(str_len = str_length(Shipping)) %>% 
+filter(str_len > 0) %>%
+  mutate(royal_mail = "0") %>%  
+  
+  mutate(royal_mail = if_else(`Package size` == "Large letter" & `Package size` != "Parcel" & `Shipping service` != 'Special Delivery Guaranteed by 1pm - £750',
+                              
+                      if_else(`Shipping service` == "Royal Mail 48",
+                      if_else(`Weight (kg)` <= "0.1",large_letter["100g"][[1]][[2]],
+                      if_else(`Weight (kg)` > "0.1" & `Weight (kg)` <= "0.25",large_letter["250g"][[1]][[2]],
+                      if_else(`Weight (kg)` > "0.25" & `Weight (kg)` <= "0.5",large_letter["500g"][[1]][[2]],
+                      if_else(`Weight (kg)` > "0.5" & `Weight (kg)` <= "0.75",large_letter["750g"][[1]][[2]],"0") 
+                              ))),
+                      if_else(`Weight (kg)` <= "0.1",large_letter["100g"][[1]][[1]],
+                      if_else(`Weight (kg)` > "0.1" & `Weight (kg)` <= "0.25",large_letter["250g"][[1]][[1]],
+                      if_else(`Weight (kg)` > "0.25" & `Weight (kg)` <= "0.5",large_letter["500g"][[1]][[1]],
+                      if_else(`Weight (kg)` > "0.5" & `Weight (kg)` <= "0.75",large_letter["750g"][[1]][[1]],"0")
+                              )))),"0")
+ ) %>%
+  
+ mutate(royal_mail = if_else(royal_mail == "0" & `Package size` != "Large letter" & `Shipping service` != 'Special Delivery Guaranteed by 1pm - £750',
+                      if_else(`Package size` == "Parcel",  
+                              
+                      if_else(`Shipping service` == "Royal Mail 48",
+                      if_else(`Weight (kg)` <= 1,parcel["1000g"][[1]][[2]],
+                      if_else(`Weight (kg)` > 1 & `Weight (kg)` <= 2,parcel["2000g"][[1]][[2]],"0")
+                              ),
+                      if_else(`Weight (kg)` <= 1,parcel["1000g"][[1]][[1]],
+                      if_else(`Weight (kg)` > 1 & `Weight (kg)` <= 2,parcel["2000g"][[1]][[1]],
+                      if_else(`Weight (kg)` > 2 & `Weight (kg)` <= 10,parcel["10000g"][[1]][[1]],
+                      if_else(`Weight (kg)` > 10 & `Weight (kg)` <= 20,parcel["20000g"][[1]][[1]],"0")
+                              )),"0")
+                      ),"0")  
+ ,royal_mail)) %>% 
+ 
+ mutate(day = weekdays(as.Date(str_sub(`Despatch date`,start = 1, end = 10)))) %>%   
+ mutate(royal_mail = if_else(royal_mail == "0",
+                              
+                      if_else(`Shipping service` == 'Special Delivery Guaranteed by 1pm - £750',
+                              
+                      if_else(day == "Friday",
+                      if_else(`Weight (kg)` <= "0.1",sdg_we["100g"][[1]][[1]],
+                      if_else(`Weight (kg)` > "0.1" & `Weight (kg)` <= "0.5",sdg_we["500g"][[1]][[1]],
+                      if_else(`Weight (kg)` > "0.5" & `Weight (kg)` <= "1",sdg_we["1000g"][[1]][[1]],
+                      if_else(`Weight (kg)` > 1 & `Weight (kg)` <= 2,sdg_we["2000g"][[1]][[1]],        
+                      if_else(`Weight (kg)` > 2 & `Weight (kg)` <= 10,sdg_we["10000g"][[1]][[1]],"0") 
+                              )))),
+                      if_else(`Weight (kg)` <= "0.1",sdg_wd["100g"][[1]][[1]],
+                      if_else(`Weight (kg)` > "0.1" & `Weight (kg)` <= "0.5",sdg_wd["500g"][[1]][[1]],
+                      if_else(`Weight (kg)` > "0.5" & `Weight (kg)` <= "1",sdg_wd["1000g"][[1]][[1]],
+                      if_else(`Weight (kg)` > 1 & `Weight (kg)` <= 2,sdg_wd["2000g"][[1]][[1]],        
+                      if_else(`Weight (kg)` > 2 & `Weight (kg)` <= 10,sdg_wd["10000g"][[1]][[1]],"0") 
+                              ))),"0")
+                      ),                              
+                      "0")
+                      
+                      ,royal_mail)) %>%  
+                        
+  #select(str_name,Total,Shipping,`Weight (kg)`,`Package size`,`Shipping service`,royal_mail)
+  select(str_name,Total,Shipping,`Weight (kg)`,`Package size`,`Shipping service`,royal_mail,`Despatch date`,day) 
+```
+```{r}
+write_csv(manifest_dump,"manifest_dump.csv")
+```
