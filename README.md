@@ -32,9 +32,12 @@ sdg_wd = list("100g"=c("7.50"),"500g"=c("7.86"),"1000g"=c("9.18"),"2000g"=c("11.
 sdg_we = list("100g"=c("10.50"),"500g"=c("10.86"),"1000g"=c("12.18"),"2000g"=c("14.70"),"10000g"=c("19.14"))
 ```
 
-This script will write to a CSV file currently called manifest_dump.csv
+## Output
+
+This script will write to a CSV file called manifest_dump.csv in the data directroy called output.
+There is a dummy file showing the
 
 ```{r}
-write_csv(manifest_dump,"manifest_dump.csv")
+write_csv(manifest_dump,"data/output/manifest_dump.csv")
 ```
 
