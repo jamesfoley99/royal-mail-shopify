@@ -35,7 +35,7 @@ sdg_we = list("100g"=c("10.50"),"500g"=c("10.86"),"1000g"=c("12.18"),"2000g"=c("
 ## Output
 
 This script will write to a CSV file called manifest_dump.csv in the data directroy called output.
-There is a dummy file showing the
+There is a dummy file showing the field names in the header row.
 
 ```{r}
 write_csv(manifest_dump,"data/output/manifest_dump.csv")
