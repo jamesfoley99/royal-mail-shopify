@@ -1,7 +1,7 @@
 ---
 title: "grid_manifest"
 output: html_document
-date: '2022-03-18'
+date: '2022-03-20'
 ---
 
 ```{r setup, include=FALSE}
@@ -10,7 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 library(tidyverse)
-orders <- read_csv("data/combined/combined.csv")
+orders <- read_csv("data/orders/combined.csv")
 manifest <- read_csv("data/manifest/combined.csv")
 ```
 
