@@ -96,5 +96,5 @@ filter(str_len > 0) %>%
   select(str_name,Total,Shipping,`Weight (kg)`,`Package size`,`Shipping service`,royal_mail,`Despatch date`,day) 
 ```
 ```{r}
-write_csv(manifest_dump,"manifest_dump.csv")
+write_csv(manifest_dump,""data/output/manifest_dump.csv")
 ```
